@@ -1,0 +1,375 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --gold:#D4A843;--gold2:#F0C060;--dark:#0D0D18;--card:#14142A;
+    --surface:#1C1C38;--border:#2E2E5A;--text:#E8E4F0;--muted:#7070A0;
+    --accent:#6C5CE7;
+  }
+  body{background:#08081A;font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+
+  .scene{perspective:1200px;perspective-origin:50% 40%;width:100%;max-width:480px;padding:32px 16px;}
+
+  .kiosk-wrap{transform-style:preserve-3d;animation:floatY 5s ease-in-out infinite;}
+  @keyframes floatY{0%,100%{transform:translateY(0) rotateX(2deg) rotateY(-1deg);}50%{transform:translateY(-10px) rotateX(3deg) rotateY(1deg);}}
+
+  .kiosk{
+    transform-style:preserve-3d;
+    background:linear-gradient(160deg,#1e1e3c 0%,#141430 100%);
+    border-radius:28px;border:1.5px solid var(--border);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.06) inset,
+      0 40px 80px rgba(0,0,0,0.7),
+      0 0 60px rgba(108,92,231,0.15);
+    overflow:hidden;position:relative;
+  }
+  .kiosk::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 60%);
+    pointer-events:none;z-index:0;
+  }
+  .kiosk::after{
+    content:'';position:absolute;bottom:0;left:0;right:0;height:80px;
+    background:linear-gradient(to top,rgba(108,92,231,0.12),transparent);
+    pointer-events:none;z-index:0;
+  }
+
+  .top-stripe{height:4px;background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent));background-size:200%;animation:shimmer 3s linear infinite;position:relative;z-index:1;}
+  @keyframes shimmer{0%{background-position:0%;}100%{background-position:200%;}}
+
+  .kiosk-inner{position:relative;z-index:2;padding:28px 28px 24px;}
+
+  /* 3D panel effect on cards */
+  .panel{
+    background:linear-gradient(145deg,#22224A,#18183A);
+    border:1px solid var(--border);border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.08);
+    transform:translateZ(8px);
+    padding:20px;
+  }
+
+  .screen-welcome,.screen-question,.screen-thankyou,.screen-confirm-overlay{display:none;}
+  .screen-welcome.active,.screen-question.active,.screen-thankyou.active{display:block;}
+  .screen-confirm-overlay.active{display:flex;}
+
+  /* Welcome */
+  .logo-orb{
+    width:72px;height:72px;border-radius:20px;margin:0 auto 20px;
+    background:linear-gradient(135deg,var(--accent),var(--gold));
+    display:flex;align-items:center;justify-content:center;font-size:2rem;
+    box-shadow:0 8px 32px rgba(108,92,231,0.5),0 0 0 1px rgba(255,255,255,0.1) inset;
+    transform:translateZ(16px);
+  }
+  .welcome-title{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;text-align:center;letter-spacing:-0.03em;color:#fff;margin-bottom:6px;text-shadow:0 2px 20px rgba(108,92,231,0.4);}
+  .welcome-sub{font-size:0.78rem;text-align:center;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:24px;}
+  .welcome-info{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;margin-bottom:24px;font-size:0.875rem;color:#a0a0c0;line-height:1.65;}
+  .welcome-info strong{color:var(--text);}
+  .tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .tag{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--gold);background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:4px 10px;letter-spacing:0.05em;}
+
+  /* Buttons */
+  .btn-primary{
+    width:100%;padding:15px;border:none;border-radius:14px;cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),#9B59B6);
+    color:#fff;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:0.02em;
+    box-shadow:0 8px 24px rgba(108,92,231,0.45),inset 0 1px 0 rgba(255,255,255,0.2);
+    transform:translateZ(12px);transition:all 0.15s;position:relative;overflow:hidden;
+  }
+  .btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,0.1),transparent);pointer-events:none;}
+  .btn-primary:hover{transform:translateZ(12px) translateY(-2px);box-shadow:0 12px 32px rgba(108,92,231,0.55);}
+  .btn-primary:active{transform:translateZ(12px) translateY(1px);}
+
+  .btn-secondary{padding:11px 20px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:rgba(255,255,255,0.04);color:#9090b0;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;transition:all 0.15s;}
+  .btn-secondary:hover{border-color:#4040708;background:rgba(255,255,255,0.08);color:var(--text);}
+  .btn-secondary:disabled{opacity:0.3;cursor:not-allowed;}
+
+  .btn-skip{background:none;border:none;color:var(--muted);font-size:0.8rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:'DM Sans',sans-serif;padding:11px;transition:color 0.15s;}
+  .btn-skip:hover{color:#a0a0c0;}
+
+  .btn-gold{padding:11px 22px;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1a2a;font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;box-shadow:0 4px 16px rgba(212,168,67,0.35),inset 0 1px 0 rgba(255,255,255,0.3);transition:all 0.15s;}
+  .btn-gold:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(212,168,67,0.45);}
+
+  /* Progress */
+  .prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .prog-label{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;}
+  .prog-num{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--gold);}
+  .prog-num span{color:#3a3a6a;}
+  .prog-track{height:3px;background:#1e1e40;border-radius:2px;overflow:hidden;margin-bottom:24px;}
+  .prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width 0.5s cubic-bezier(0.4,0,0.2,1);}
+
+  /* Question */
+  .q-num-badge{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;}
+  .q-text{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:600;color:#fff;line-height:1.4;letter-spacing:-0.01em;margin-bottom:28px;}
+
+  /* Stars */
+  .stars{display:flex;gap:10px;justify-content:center;}
+  .star-btn{background:none;border:none;cursor:pointer;padding:6px;font-size:2rem;transition:all 0.15s cubic-bezier(.34,1.56,.64,1);filter:grayscale(1) brightness(0.5);line-height:1;}
+  .star-btn.lit{filter:grayscale(0) drop-shadow(0 0 8px rgba(212,168,67,0.6));transform:scale(1.15);}
+  .star-btn:hover{transform:scale(1.25);}
+
+  /* Number grid */
+  .num-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:340px;margin:0 auto;}
+  .num-btn{width:46px;height:46px;border-radius:10px;border:1.5px solid var(--border);background:#18183A;color:#a0a0c0;font-family:'DM Mono',monospace;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.15s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;justify-content:center;}
+  .num-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(212,168,67,0.1);transform:scale(1.08);}
+  .num-btn.active{border-color:var(--gold);background:var(--gold);color:#1a1a2a;box-shadow:0 0 20px rgba(212,168,67,0.4);transform:scale(1.1);}
+  .num-hint{width:100%;display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);font-family:'DM Mono',monospace;padding:6px 4px 0;}
+
+  /* Textarea */
+  .survey-textarea{width:100%;min-height:100px;background:#18183A;border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.9rem;line-height:1.65;padding:14px 16px;resize:none;outline:none;transition:border-color 0.2s;}
+  .survey-textarea::placeholder{color:#3a3a6a;}
+  .survey-textarea:focus{border-color:var(--accent);}
+
+  /* Nav */
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);}
+
+  /* Thank you */
+  .ty-icon{font-size:4rem;text-align:center;margin-bottom:16px;display:block;animation:popIn 0.5s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes popIn{from{transform:scale(0.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .ty-title{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:#fff;text-align:center;letter-spacing:-0.03em;margin-bottom:8px;}
+  .ty-sub{color:var(--muted);text-align:center;font-size:0.9rem;line-height:1.65;margin-bottom:24px;}
+  .countdown-ring{width:52px;height:52px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--accent);margin:0 auto 12px;box-shadow:0 0 20px rgba(108,92,231,0.3);}
+  .ty-returning{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);text-align:center;}
+
+  /* Confirm overlay */
+  .screen-confirm-overlay{
+    position:absolute;inset:0;background:rgba(8,8,26,0.88);backdrop-filter:blur(8px);
+    align-items:center;justify-content:center;z-index:20;border-radius:28px;
+  }
+  .confirm-card{background:linear-gradient(145deg,#1e1e42,#16163A);border:1.5px solid var(--border);border-radius:20px;padding:32px 28px;max-width:280px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,0.6);}
+  .confirm-icon{font-size:3rem;display:block;margin-bottom:12px;}
+  .confirm-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:10px;}
+  .confirm-sub{font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+  .confirm-btns{display:flex;gap:12px;}
+
+  /* Footer */
+  .kiosk-footer{display:flex;justify-content:space-between;align-items:center;padding:12px 28px;border-top:1px solid rgba(255,255,255,0.05);position:relative;z-index:2;}
+  .footer-label{font-family:'DM Mono',monospace;font-size:0.6rem;color:#2e2e5a;letter-spacing:0.1em;}
+  .footer-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+  /* 3D side faces */
+  .side-right{
+    position:absolute;top:10px;right:-18px;width:18px;height:calc(100% - 20px);
+    background:linear-gradient(180deg,#0e0e22,#08081a);
+    border-radius:0 8px 8px 0;
+    transform-origin:left center;transform:rotateY(-90deg) translateZ(-1px);
+    box-shadow:inset -2px 0 8px rgba(0,0,0,0.5);
+  }
+  .side-bottom{
+    position:absolute;bottom:-14px;left:10px;right:10px;height:14px;
+    background:linear-gradient(90deg,#0a0a1e,#0e0e28,#0a0a1e);
+    border-radius:0 0 8px 8px;
+    transform-origin:top center;transform:rotateX(-90deg) translateZ(-1px);
+  }
+</style>
+
+<div class="scene">
+  <div class="kiosk-wrap">
+    <div class="kiosk" id="kiosk" style="position:relative;">
+      <div class="top-stripe"></div>
+      <div class="kiosk-inner">
+
+        <!-- WELCOME -->
+        <div class="screen-welcome active" id="screen-welcome">
+          <div class="panel">
+            <div class="logo-orb">🛍️</div>
+            <div class="welcome-title">Welcome</div>
+            <div class="welcome-sub">Customer Survey Kiosk</div>
+            <div class="welcome-info">
+              We value your feedback! This quick survey takes less than <strong>2 minutes</strong> and helps us serve you better.
+              <div class="tags">
+                <span class="tag">5 Questions</span>
+                <span class="tag">Skip Anytime</span>
+                <span class="tag">Anonymous</span>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="startSurvey()">Begin Survey →</button>
+          </div>
+        </div>
+
+        <!-- QUESTION -->
+        <div class="screen-question" id="screen-question">
+          <div class="prog-header">
+            <span class="prog-label">Survey Progress</span>
+            <span class="prog-num" id="prog-num">1<span>/5</span></span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:20%"></div></div>
+          <div class="panel">
+            <div class="q-num-badge" id="q-num-badge">Question 1</div>
+            <div class="q-text" id="q-text"></div>
+            <div id="q-input-area"></div>
+          </div>
+          <div class="nav-row">
+            <button class="btn-secondary" id="btn-prev" onclick="goPrev()">← Prev</button>
+            <button class="btn-skip" onclick="goSkip()">Skip</button>
+            <button class="btn-gold" id="btn-next" onclick="goNext()">Next →</button>
+          </div>
+        </div>
+
+        <!-- THANK YOU -->
+        <div class="screen-thankyou" id="screen-thankyou">
+          <div class="panel" style="text-align:center;padding:36px 24px;">
+            <span class="ty-icon">✅</span>
+            <div class="ty-title">Thank You!</div>
+            <div class="ty-sub">Your feedback has been recorded and<br>will help us serve you better.</div>
+            <div class="countdown-ring" id="countdown-ring">5</div>
+            <div class="ty-returning">Returning to welcome screen…</div>
+          </div>
+        </div>
+
+        <!-- CONFIRM OVERLAY -->
+        <div class="screen-confirm-overlay" id="screen-confirm">
+          <div class="confirm-card">
+            <span class="confirm-icon">📋</span>
+            <div class="confirm-title">Submit Survey?</div>
+            <div class="confirm-sub">You're about to submit your responses. This action cannot be undone.</div>
+            <div class="confirm-btns">
+              <button class="btn-secondary" style="flex:1;" onclick="hideConfirm()">Go Back</button>
+              <button class="btn-gold" style="flex:1;" onclick="confirmSubmit()">Submit</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="kiosk-footer">
+        <span class="footer-label">SURVEY KIOSK v1.0</span>
+        <div class="footer-dot"></div>
+        <span class="footer-label" id="footer-sid">—</span>
+      </div>
+      <div class="side-right"></div>
+      <div class="side-bottom"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS=[
+  {id:'q1',type:'rating',scale:5, text:'How satisfied are you with our products?'},
+  {id:'q2',type:'rating',scale:5, text:'How fair are the prices compared to similar retailers?'},
+  {id:'q3',type:'rating',scale:5, text:'How satisfied are you with the value for money of your purchase?'},
+  {id:'q4',type:'rating',scale:10,text:'On a scale of 1–10, how would you recommend us to your friends and family?'},
+  {id:'q5',type:'text',          text:'What could we do to improve our service?'},
+];
+
+let session=null;
+let currentIdx=0;
+let countdownTimer=null;
+
+function genId(){return 'sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);}
+
+function getSessions(){try{return JSON.parse(localStorage.getItem('survey_sessions')||'{}');}catch{return {};}}
+function saveSession(s){const all=getSessions();all[s.sessionId]=s;localStorage.setItem('survey_sessions',JSON.stringify(all));}
+
+function show(id){
+  ['screen-welcome','screen-question','screen-thankyou'].forEach(s=>{
+    document.getElementById(s).classList.toggle('active',s===id);
+  });
+}
+
+function startSurvey(){
+  session={sessionId:genId(),startedAt:new Date().toISOString(),status:'IN_PROGRESS',answers:{}};
+  saveSession(session);
+  document.getElementById('footer-sid').textContent=session.sessionId.slice(0,18)+'…';
+  currentIdx=0;
+  show('screen-question');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=QUESTIONS[currentIdx];
+  const total=QUESTIONS.length;
+  const pct=((currentIdx+1)/total*100).toFixed(0);
+  document.getElementById('prog-num').innerHTML=`${currentIdx+1}<span>/${total}</span>`;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('q-num-badge').textContent='Question '+(currentIdx+1);
+  document.getElementById('q-text').textContent=q.text;
+  document.getElementById('btn-prev').disabled=currentIdx===0;
+  document.getElementById('btn-next').textContent=currentIdx===total-1?'Finish ✓':'Next →';
+
+  const area=document.getElementById('q-input-area');
+  const saved=session.answers[q.id];
+
+  if(q.type==='rating'&&q.scale<=5){
+    let html='<div class="stars">';
+    for(let i=1;i<=q.scale;i++){
+      html+=`<button class="star-btn ${saved&&i<=saved?'lit':''}" data-n="${i}" onclick="setRating('${q.id}',${i},${q.scale})" onmouseenter="hoverStars(${i},${q.scale})" onmouseleave="resetStars('${q.id}',${q.scale})">★</button>`;
+    }
+    html+='</div>';
+    area.innerHTML=html;
+  } else if(q.type==='rating'&&q.scale===10){
+    let html='<div class="num-grid">';
+    for(let i=1;i<=10;i++){
+      html+=`<button class="num-btn ${saved===i?'active':''}" onclick="setNum('${q.id}',${i})">${i}</button>`;
+    }
+    html+='<div class="num-hint"><span>Not likely</span><span>Very likely</span></div></div>';
+    area.innerHTML=html;
+  } else {
+    area.innerHTML=`<textarea class="survey-textarea" id="txt-input" placeholder="Share your thoughts here…" oninput="saveText('${q.id}',this.value)">${saved||''}</textarea>`;
+  }
+}
+
+function hoverStars(n,scale){
+  document.querySelectorAll('.star-btn').forEach((b,i)=>{
+    b.classList.toggle('lit',i<n);
+    b.style.transform=i<n?'scale(1.15)':'scale(1)';
+  });
+}
+function resetStars(qId,scale){
+  const saved=session.answers[qId]||0;
+  document.querySelectorAll('.star-btn').forEach((b,i)=>{
+    b.classList.toggle('lit',i<saved);
+    b.style.transform='';
+  });
+}
+function setRating(qId,n){
+  session.answers[qId]=n;
+  saveSession(session);
+  renderQuestion();
+}
+function setNum(qId,n){
+  session.answers[qId]=n;
+  saveSession(session);
+  renderQuestion();
+}
+function saveText(qId,val){
+  session.answers[qId]=val;
+  saveSession(session);
+}
+
+function goNext(){
+  if(currentIdx<QUESTIONS.length-1){currentIdx++;renderQuestion();}
+  else showConfirm();
+}
+function goPrev(){if(currentIdx>0){currentIdx--;renderQuestion();}}
+function goSkip(){
+  if(currentIdx<QUESTIONS.length-1){currentIdx++;renderQuestion();}
+  else showConfirm();
+}
+function showConfirm(){document.getElementById('screen-confirm').classList.add('active');}
+function hideConfirm(){document.getElementById('screen-confirm').classList.remove('active');}
+
+function confirmSubmit(){
+  session.status='COMPLETED';session.completedAt=new Date().toISOString();
+  saveSession(session);
+  hideConfirm();
+  show('screen-thankyou');
+  startCountdown(5);
+}
+
+function startCountdown(n){
+  document.getElementById('countdown-ring').textContent=n;
+  if(countdownTimer)clearInterval(countdownTimer);
+  let t=n;
+  countdownTimer=setInterval(()=>{
+    t--;document.getElementById('countdown-ring').textContent=t;
+    if(t<=0){clearInterval(countdownTimer);returnToWelcome();}
+  },1000);
+}
+
+function returnToWelcome(){
+  session=null;
+  document.getElementById('footer-sid').textContent='—';
+  show('screen-welcome');
+}
+</script>
